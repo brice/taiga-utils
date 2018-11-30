@@ -1,16 +1,21 @@
 var jsonloader = require('jsonloader');
+require('dotenv').config();
 var file = new jsonloader('package.json');
 var request = require('request');
 var mysql = require('mysql');
-const fs = require('fs')
-var url1= "1 ERE URL DU SCRIPT GetCSVDATA";
-var url2= '2e URL DU SCRIPT GetCSVDATA';
-var url3='3e URL DU SCRIPT GetCSVDATA limite après"="';
+const fs = require('fs');
+var url1= process.env.Url+'auth';
+var url2= process.env.Url+'milestones\?project\=12';
+var url3= process.env.Url+'userstories?milestone=';
 
 //En premier PACKAGE.JSON A CONFIGURER USER ET PASSWORD
-var user = file.USERNAME;
-var pass = file.PASSWORD;
-
+var user = process.env.USERNAME,
+pass = process.env.PASSWORD,
+hostdb= process.env.host,
+userdb= process.env.user,
+passwordb= process.env.password,
+databasedb= process.env.database;
+// Autres variables globales
 var iD;
 var requete;
 // Save these for future requests
@@ -28,21 +33,14 @@ var options = {
     headers: headers,
     form: {type: "normal", username: user, password: pass}
 }
-// Configure the request
-var options2 = {
-    url: url2,
-    method: 'GET',
-    headers: headers,
-    form: {type: "normal", username: user, password: pass}
-}
 
 // connetion DataBase
     var con = mysql.createConnection({
 
-        host: "A REMPLIR",
-        user: "A REMPLIR",
-        password: "A REMPLIR",
-        database: "A REMPLIR"
+        host: hostdb,
+        user: userdb,
+        password: passwordb,
+        database: databasedb
     });
     
     con.connect(function(err) {
@@ -51,13 +49,12 @@ var options2 = {
         if (err) throw err;
         requete1=JSON.stringify(result);
         requete=JSON.parse(requete1);
-        console.log(requete);
+        //console.log(requete);
         rsetAuth(requete);
         });
         
     });
     
-
  //Start the request
  function rsetAuth(req){
     request(options, function (error, response, body) {
@@ -66,7 +63,7 @@ var options2 = {
            // console.log(body)
             json_body=JSON.parse(body);
             auth_Token=json_body.auth_token;
-            console.log('la valeur du token est '+auth_Token);
+            //console.log('la valeur du token est '+auth_Token);
             rGetId(auth_Token, req);     
         }
        
@@ -83,20 +80,20 @@ function rGetId(authToken, requete){
         method: 'GET',
         headers: headers
     }
-
     var bodyA;
     request(options, function(error, response, body){
+       
         bodyA=JSON.parse(body);
-        console.log("la longueur requeste est "+bodyA.length);
+        //console.log("la longueur requeste est "+bodyA.length);
         iD=deplieId(bodyA);
-        var l=iD.length;
-        console.log("la valeur de l'id est de " +iD);
-        var renduAPI=rGetId2(authToken, iD, requete);
+        //var l=iD.length;
+        //console.log("la valeur de l'id est de " +iD);
+        rGetId2(authToken, iD, requete);
     });
 }
     function deplieId(doc){
         for(var prop in doc) {
-        console.log("la longueur requeste est "+prop,doc[prop].length);  
+        //console.log("la longueur requeste est "+prop,doc[prop].length);  
         if(prop==1){
             break;
         }
@@ -117,7 +114,7 @@ function rGetId(authToken, requete){
         }
         var bodyA;
         request(options, function(error, response, body){
-            console.log('nom de la page url='+url3+id);
+            //console.log('nom de la page url='+url3+id);
             bodyA=JSON.parse(body);
             extract(requete,bodyA);
         }); 
@@ -125,7 +122,7 @@ function rGetId(authToken, requete){
     }
 
 function extract(squash, taiga){
-    var refT,j=0,compt, comptM=0, max=taiga.length, 
+    var refT,j=0, compt, max=taiga.length, 
     deb='T#', pred='/AMI 9.0/'
     var retour={};
     var tab=[];
@@ -146,17 +143,17 @@ function extract(squash, taiga){
         }
     }
     tab.push(retour);
-    console.log("valeur(s) finale(s) retenue(s)");
+    //console.log("valeur(s) finale(s) retenue(s)");
     console.log(retour); 
     makeCsv(retour);
-    console.log(tab); 
+    //console.log(tab); 
 }
 function makeCsv(documents){
     var filename   = "Resultat.csv";
     var doc=JSON.stringify(documents); 
     fs.writeFile(filename, doc, function (err) {
       if (err) throw err;
-      console.log('Le Document a bien été généré!');
+      console.log('Le Document '+filename +' a bien été généré!');
     }); 
 }
 
