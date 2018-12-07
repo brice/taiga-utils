@@ -1,21 +1,19 @@
-var jsonloader = require('jsonloader');
 require('dotenv').config();
-var file = new jsonloader('package.json');
 var request = require('request');
 var mysql = require('mysql');
+var arrDiff = require('arrays-difference');
 const fs = require('fs');
 var url1= process.env.Url+'auth';
 var url2= process.env.Url+'milestones\?project\=12';
 var url3= process.env.Url+'userstories?milestone=';
 
-//En premier PACKAGE.JSON A CONFIGURER USER ET PASSWORD
 var user = process.env.USERNAME,
 pass = process.env.PASSWORD,
 hostdb= process.env.host,
 userdb= process.env.user,
-passwordb= process.env.password,
+passwordb= process.env.passwordb,
 databasedb= process.env.database;
-// Autres variables globales
+
 var iD;
 var requete;
 // Save these for future requests
@@ -47,24 +45,20 @@ var options = {
         if (err) throw err;
         con.query("SELECT * FROM REQUIREMENT_VERSION WHERE REFERENCE LIKE '%T%' ", function (err, result, fields) {
         if (err) throw err;
-        requete1=JSON.stringify(result);
-        requete=JSON.parse(requete1);
-        //console.log(requete);
-        rsetAuth(requete);
+        requete=JSON.stringify(result);
+        resultat=JSON.parse(requete);
+        rsetAuth(resultat);
         });
         
     });
-    
+
  //Start the request
  function rsetAuth(req){
     request(options, function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            // Print out the response body
-           // console.log(body)
             json_body=JSON.parse(body);
             auth_Token=json_body.auth_token;
-            //console.log('la valeur du token est '+auth_Token);
-            rGetId(auth_Token, req);     
+            rGetId(auth_Token, req);
         }
        
     });
@@ -84,16 +78,12 @@ function rGetId(authToken, requete){
     request(options, function(error, response, body){
        
         bodyA=JSON.parse(body);
-        //console.log("la longueur requeste est "+bodyA.length);
         iD=deplieId(bodyA);
-        //var l=iD.length;
-        //console.log("la valeur de l'id est de " +iD);
-        rGetId2(authToken, iD, requete);
+        var renduAPI=rGetId2(authToken, iD, requete);
     });
 }
     function deplieId(doc){
         for(var prop in doc) {
-        //console.log("la longueur requeste est "+prop,doc[prop].length);  
         if(prop==1){
             break;
         }
@@ -114,47 +104,88 @@ function rGetId(authToken, requete){
         }
         var bodyA;
         request(options, function(error, response, body){
-            //console.log('nom de la page url='+url3+id);
+         
             bodyA=JSON.parse(body);
-            extract(requete,bodyA);
+            var squash=ticketToTab1(requete);
+            var taiga=ticketToTab2(bodyA);
+            extract(squash,taiga,bodyA);
         }); 
-        return bodyA; 
+        return bodyA;
     }
 
-function extract(squash, taiga){
-    var refT,j=0, compt, max=taiga.length, 
-    deb='T#', pred='/AMI 9.0/'
-    var retour={};
-    var tab=[];
 
-    for(var prop in squash) {
-         refS=parseInt(squash[prop].REFERENCE.substring(2));
-         compt=0;
-         for(var prop2 in taiga) {
-           refT=taiga[prop2].ref
-           if(refT!=refS)
-           {
-               compt++;
-               if(compt==max){
-                retour[prop2]=pred+','+taiga[prop2].subject+ ", 1 ,"+ deb+refT + ','+taiga[prop2].subject;
-               }   
+function ticketToTab1(bod){
+    var retour=[];
+    for(var t in bod){
+        retour[t]=bod[t].REFERENCE.substring(2);
+    }
+    return retour;
+}
+
+function ticketToTab2(bod){
+    var retour=[];
+    for(var t in bod){
+        retour[t]=String(bod[t].ref);
+    }
+    return retour;
+}
+
+function extract(squash, taiga, taigaBrut)
+{
+    //renvoie la différence entre les données squash et ceux de taiga (squash - taiga)
+    var retour=compare(taiga,squash);
+    var tab=[];
+    var tab2=toInt(retour);
+    var retour2=misFormat(tab2,taigaBrut);
+    tab.push(retour2);
+    makeCsv(retour2);
+   
+}
+
+function compare(ta,sq){
+    return arrDiff(ta,sq);   
+}
+
+function toInt(docStr){
+    var tab=[];
+    for(var t in docStr){
+        tab.push(parseInt(docStr[t]));
+    }
+    return tab;
+}
+
+function misFormat(doc,taiga){
+    var tab=[];
+    for(var t in taiga){
+        for(var i in doc){
+            if(doc[i]==taiga[t].ref){
+                tab[t]={'':'"/AMI 9.0/'+taiga[t].subject+ '","1","T#'+doc[i]+'","'+taiga[t].subject};
             }
-            j++;  
         }
     }
-    tab.push(retour);
-    //console.log("valeur(s) finale(s) retenue(s)");
-    console.log(retour); 
-    makeCsv(retour);
-    //console.log(tab); 
+    return tab;
 }
+
 function makeCsv(documents){
-    var filename   = "Resultat.csv";
+    var filename = "Resultat.csv";
     var doc=JSON.stringify(documents); 
-    fs.writeFile(filename, doc, function (err) {
+    var doc2=nettoyage(doc);
+    fs.writeFile(filename, doc2, function (err) {
       if (err) throw err;
       console.log('Le Document '+filename +' a bien été généré!');
+      process.exit(1);
     }); 
+}
+
+function nettoyage(document){
+    var l=document.length-2;
+    var prem=document.split('null').join('');
+    var sec=prem.split(']').join('');
+    var doc2=sec.substring(7,l);
+    var doc3=doc2.split('}').join('\n');
+    var doc4=doc3.split(',{"":"').join('');
+    var doc5=doc4.split("\\").join('');
+    return doc5;
 }
 
 

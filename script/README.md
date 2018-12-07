@@ -1,5 +1,5 @@
-#Premier pas avec le script.
-Créer un fichier ".env".
-Recopier les informations du fichier "env.sample" dans ce fichier "env".
-Remplir les champs requis dans ce fichier "env".
-Installer les modules nécessaires et lancer le script avec la commande "node scriptFinal.js" OU lancer le script avec la commande "node scriptFinal.js" et installer les modules nécessaires à l'application.
+#Node.js Script
+Create a file: ".env".
+Copy the text content in "env.sample" and paste it in ".env".
+Complete required data on ".env".
+[Install required modules and run the script "node scriptFinal.js"] OR [run the script "node scriptFinal.js" then install remaining required modules].
