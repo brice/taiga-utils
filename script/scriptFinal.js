@@ -6,12 +6,18 @@ const fs = require('fs');
 var url1= process.env.Url+'auth';
 var url2= process.env.Url+'milestones\?project\=12';
 var url3= process.env.Url+'userstories?milestone=';
+if(url1.substring(0,5)!="https")
+{
+    console.log("le protocole de votre url n'est pas correct, vérifiez bien que dans votre url il correspond à https");
+    process.exit(1);
+
+}
 
 var user = process.env.USERNAME,
 pass = process.env.PASSWORD,
 hostdb= process.env.host,
 userdb= process.env.user,
-passwordb= process.env.passwordb,
+passwordb= process.env.password,
 databasedb= process.env.database;
 
 var iD;
