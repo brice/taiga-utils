@@ -1,10 +1,13 @@
-require('dotenv').config();
+
+
 var request = require('request');
 var mysql = require('mysql');
 var arrDiff = require('arrays-difference');
+
+
 const fs = require('fs');
 var url1= process.env.Url+'auth';
-var url2= process.env.Url+'milestones\?project\=12';
+var url2= process.env.Url+'issues\?project\=12\&type=34\&status=82';
 var url3= process.env.Url+'userstories?milestone=';
 if(url1.substring(0,5)!="https")
 {
