@@ -5,6 +5,7 @@ Various utils to query Taiga's API and make action.
 
 * [ ] Get user story of the current sprint
 * [ ] List the opened issues for a tags
+* [ ] Create a reusable library to query Taiga's API in JS
 * [ ] Change the status of an issue
 * [ ] Many other things
 
