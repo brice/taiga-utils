@@ -1,8 +1,6 @@
 'use strict';
 
-const parse = require('minimist');
 const rp = require('request-promise');
-const ObjectsToCsv = require('objects-to-csv');
 const taiga = require('./lib/taiga');
 const fs = require('fs');
 
@@ -10,28 +8,12 @@ require('dotenv').config();
 
 const user = process.env.USERNAME;
 const password = process.env.PASSWORD;
-const prefixUrl = process.env.Url;
 
 const Headers = {
 	'User-Agent': 'Super Agent/0.0.1',
 	'Content-Type': 'application/json',
 	'x-disable-pagination': 'true'
 };
-
-
-async function getIssues(authToken){
-	let headers = Headers;
-	headers['Authorization'] = 'Bearer '+authToken;
-
-	const urlIssues = process.env.Url + 'issues\?project\=12\&type=34\&status=78,79';
-	let options;
-	options = {
-		uri: urlIssues,
-		headers: headers,
-		json: true
-	};
-	return rp(options);
-}
 
 async function execute() {
 	const token = await taiga.rsetAuth(user, password);
@@ -71,12 +53,15 @@ async function execute() {
 				info[status.name][priorityName] += 1;
 
 				issue.tags.forEach(function(tag) {
+					let priorities = JSON.parse(JSON.stringify(templatePriority));
 					if (resultPerTags[tag[0]] === undefined) {
-						resultPerTags[tag[0]] = {};
-					}
-					if (resultPerTags[tag[0]][status.name] === undefined) {
-						// console.log(JSON.parse(JSON.stringify(templatePriority)));
-						resultPerTags[tag[0]][status.name] = JSON.parse(JSON.stringify(templatePriority));
+						resultPerTags[tag[0]] = {
+							'New':priorities,
+							'In progress':priorities,
+							'Ready for test':priorities,
+							'Testing':priorities
+						};
+
 					}
 					resultPerTags[tag[0]][status.name][priorityName] += 1;
 				});
@@ -90,12 +75,12 @@ async function execute() {
 		infos.forEach(function(result) {
 			data.push(result.info);
 			dataPerTags.push(result.result);
-		})
+		});
 
 		data = JSON.stringify(data);
 		fs.writeFileSync('stats-ticket.json', data);
-		dataPerTags = JSON.stringify(dataPerTags);
 
+		dataPerTags = JSON.stringify(dataPerTags);
 		fs.writeFileSync('stats-ticket-per-tags.json', dataPerTags);
 	});
 };
