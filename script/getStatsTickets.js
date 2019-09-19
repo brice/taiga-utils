@@ -50,7 +50,6 @@ async function execute() {
 
 			issues.forEach(function(issue) {
 				let priorityName = indexPriorities[issue.priority];
-				console.log(status.name);
 				info[status.name][priorityName] += 1;
 
 				issue.tags.forEach(function(tag) {
@@ -69,7 +68,6 @@ async function execute() {
 			return {"info": info, "result": resultPerTags};
 		}
 	})).then(infos => {
-		// console.log(infos);
 		let data = [];
 		let dataPerTags = [];
 		infos.forEach(function(result) {
