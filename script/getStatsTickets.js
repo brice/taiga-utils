@@ -50,16 +50,16 @@ async function execute() {
 
 			issues.forEach(function(issue) {
 				let priorityName = indexPriorities[issue.priority];
+				console.log(status.name);
 				info[status.name][priorityName] += 1;
 
 				issue.tags.forEach(function(tag) {
-					let priorities = JSON.parse(JSON.stringify(templatePriority));
 					if (resultPerTags[tag[0]] === undefined) {
 						resultPerTags[tag[0]] = {
-							'New':priorities,
-							'In progress':priorities,
-							'Ready for test':priorities,
-							'Testing':priorities
+							'New':JSON.parse(JSON.stringify(templatePriority)),
+							'In progress':JSON.parse(JSON.stringify(templatePriority)),
+							'Ready for test':JSON.parse(JSON.stringify(templatePriority)),
+							'Testing':JSON.parse(JSON.stringify(templatePriority))
 						};
 
 					}
