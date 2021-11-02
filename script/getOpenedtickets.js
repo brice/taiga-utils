@@ -22,11 +22,10 @@ var Headers = {
 var dateFrom = undefined;
 if (args.f !== undefined) {
 	dateFrom = new Date(args.f);
-	console.log(args.f);
 }
 
 var dateTo = undefined;
-if (args.t !== undefined) {
+if (args.f !== undefined) {
 	dateTo = new Date(args.t);
 }
 
@@ -36,17 +35,11 @@ if (args.type !== undefined) {
 }
 
 var filterBy;
-if (args.d !== undefined) {
-	filterBy = args.d;
+if (args.filter !== undefined) {
+	filterBy = args.filter[0];
 } else {
 	filterBy = "modified_date";
 }
-
-var ticketStatus;
-if (args.u === undefined) {
-	ticketStatus="82,83";
-}
-console.log(ticketStatus);
 
 // Send Auth connection
 function requestAuth(){
@@ -64,15 +57,12 @@ function requestAuth(){
 	return rp(options);
 }
 
-function getIssues(authToken, type = 34, ticketStatus = undefined){
+function getIssues(authToken, type = 34){
 	var headers = Headers;
 	headers['Authorization'] = 'Bearer '+authToken;
 
-	if (ticketStatus !== undefined) {
-		var urlIssues= process.env.Url+'issues\?project\=12\&type='+type+'\&status=82,83';
-	} else {
-		var urlIssues= process.env.Url+'issues\?project\=12\&type='+type;
-	}
+	var urlIssues= process.env.Url+'issues\?project\=12\&type='+type+'\&status=82,83';
+	// var urlIssues= process.env.Url+'issues\?project\=12\&type='+type;
 	console.log(urlIssues);
 	var options = {
 		uri: urlIssues,
@@ -83,19 +73,19 @@ function getIssues(authToken, type = 34, ticketStatus = undefined){
 }
 
 requestAuth().then(function(body) {
-	getIssues(body.auth_token, ticketType, ticketStatus).then(function(body){
+	getIssues(body.auth_token, ticketType).then(function(body){
 		var items = [];
 
 		body.forEach(function(item){
-			// console.log(item);
-			var dateTicket = new Date(item[filterBy]);
+			console.log(item);
+			ar dateTicket = new Date(item[filterBy]);
 			// console.log(dateTicket);
 			// We do that because we want to eliminate ticket before and after a certain date
 			if ((undefined !== dateFrom && dateTicket < dateFrom) || (undefined !== dateTo && dateTicket > dateTo)) {
 				return;
 			}
 			// console.log(dateTicket);
-			console.log(dateTicket+' #'+item.ref+' '+item.subject);
+			console.log(item.ref+' '+item.subject);
 			items.push(item);
 		});
 

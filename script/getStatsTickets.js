@@ -72,8 +72,8 @@ async function execute() {
 		let dataPerTags = [];
 		infos.forEach(function(result) {
 			data.push(result.info);
-			dataPerTags.push(result.result);
 		});
+		dataPerTags.push(result.result);
 
 		data = JSON.stringify(data);
 		fs.writeFileSync('stats-ticket.json', data);

@@ -116,7 +116,6 @@ async function getStory(authToken, storyId) {
 }
 
 async function execute() {
-    const requirementsReferences = await getRequirements();
     const token = await rsetAuth();
     const milestones = await getMilestones(token);
     let stories = [];
@@ -128,16 +127,19 @@ async function execute() {
 				return;
 			}
 		}
-		let index = sprint.user_stories.map(function(story) {
-			stories['T#'+story.ref] = story.id;
-			return 'T#'+story.ref;
-		});
-		const diff = arrDiff(index,requirementsReferences);
 
-		Promise.all(diff.map(async (storyRef) => {
-			let story = await getStory(token, stories[storyRef]);
-			console.log(storyRef+':'+story.subject+"\n"+story.description+"\n");
-			console.log(story.tags);
+		let index = sprint.user_stories.map(function(story) {
+			return story.id;
+		});
+		// const diff = arrDiff(index,requirementsReferences);
+		//
+		Promise.all(index.map(async (storyRef) => {
+			let story = await getStory(token, storyRef);
+			console.log(story.subject+','+story.milestone_name+',T#'+story.ref+','+story.tags.toString());
+
+
+		// 	console.log(storyRef+':'+story.subject+"\n"+story.description+"\n");
+		// 	console.log(story.tags);
 		}));
 	});
 }
