@@ -17,7 +17,7 @@
     "deep-object-diff": "^1.1.0",
     "dotenv": "^6.1.0",
     "export-to-csv": "^0.1.2",
-    "json-2-csv": "^2.4.0",
+    "json-2-csv": "^3.14.4",
     "json-value-to-array": "0.0.2",
     "json2csv": "^4.5.3",
     "jsonexport": "^2.4.1",
